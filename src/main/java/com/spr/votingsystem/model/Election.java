@@ -3,7 +3,7 @@ package com.spr.votingsystem.model;
 import jakarta.persistence.*;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 @Entity
 public class Election {
@@ -22,7 +22,7 @@ public class Election {
     private Date date;
 
     @OneToMany
-    private List<Seat> seats;
+    private Set<Seat> seats;
 
     public Election() {}
 
@@ -58,11 +58,11 @@ public class Election {
         this.date = date;
     }
 
-    public List<Seat> getSeats() {
+    public Set<Seat> getSeats() {
         return seats;
     }
 
-    public void setSeats(List<Seat> seats) {
+    public void setSeats(Set<Seat> seats) {
         this.seats = seats;
     }
 }

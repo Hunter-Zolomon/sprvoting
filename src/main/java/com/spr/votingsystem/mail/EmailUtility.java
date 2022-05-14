@@ -3,13 +3,8 @@ package com.spr.votingsystem.mail;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.api.mailer.Mailer;
 import org.simplejavamail.api.mailer.config.TransportStrategy;
-import org.simplejavamail.config.ConfigLoader;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.MailerBuilder;
-
-import java.net.Authenticator;
-import java.net.PasswordAuthentication;
-import java.util.Properties;
 
 public class EmailUtility {
     public static void sendEmail(String host, int port, final String username,

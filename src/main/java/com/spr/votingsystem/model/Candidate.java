@@ -2,7 +2,8 @@ package com.spr.votingsystem.model;
 
 import jakarta.persistence.*;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Candidate {
@@ -23,8 +24,21 @@ public class Candidate {
     @OneToOne
     private Party party;
 
-    @OneToMany
-    private List<Election> elections;
+    @ManyToMany(targetEntity = Seat.class, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "candidates_seats",
+            joinColumns = { @JoinColumn(name = "candidate_id") },
+            inverseJoinColumns = { @JoinColumn(name = "seat_id") },
+            uniqueConstraints = { @UniqueConstraint(columnNames = { "candidate_id", "seat_id"}) })
+    private Set<Seat> seats = new HashSet<>();
+
+    @ManyToMany(targetEntity = Election.class, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "candidates_elections",
+            joinColumns = { @JoinColumn(name = "candidate_id") },
+            inverseJoinColumns = { @JoinColumn(name = "election_id") },
+            uniqueConstraints = { @UniqueConstraint(columnNames = { "candidate_id", "election_id"}) })
+    private Set<Election> elections = new HashSet<>();
 
     public Candidate() {}
 
@@ -68,11 +82,19 @@ public class Candidate {
         this.party = party;
     }
 
-    public List<Election> getElections() {
+    public Set<Seat> getSeats() {
+        return seats;
+    }
+
+    public void setSeats(Set<Seat> seats) {
+        this.seats = seats;
+    }
+
+    public Set<Election> getElections() {
         return elections;
     }
 
-    public void setElections(List<Election> elections) {
+    public void setElections(Set<Election> elections) {
         this.elections = elections;
     }
 }

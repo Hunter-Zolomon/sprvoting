@@ -1,8 +1,6 @@
 package com.spr.votingsystem.controller;
 
-import com.spr.votingsystem.model.Candidate;
 import com.spr.votingsystem.model.Election;
-import com.spr.votingsystem.model.Party;
 import com.spr.votingsystem.model.Seat;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;

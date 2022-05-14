@@ -1,7 +1,6 @@
 package com.spr.votingsystem.servlets;
 
 import com.spr.votingsystem.controller.UserController;
-import com.spr.votingsystem.model.Party;
 import com.spr.votingsystem.model.User;
 import com.spr.votingsystem.utilities.HelperFunctions;
 import jakarta.servlet.ServletException;

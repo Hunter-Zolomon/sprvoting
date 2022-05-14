@@ -2,13 +2,13 @@ package com.spr.votingsystem.servlets;
 
 import com.spr.votingsystem.controller.CandidateController;
 import com.spr.votingsystem.controller.PartyController;
-import com.spr.votingsystem.controller.UserController;
 import com.spr.votingsystem.model.Candidate;
 import com.spr.votingsystem.model.Party;
-import com.spr.votingsystem.model.User;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.*;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -87,6 +87,35 @@ public class PartyManagementServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String servletPath = request.getServletPath();
+        Integer party_id = null;
+        Integer candidate_id = null;
+        if (request.getParameter("party_id") != null)
+            party_id = Integer.parseInt(request.getParameter("party_id"));
+        if (request.getParameter("candidate_id") != null)
+            candidate_id = Integer.parseInt(request.getParameter("candidate_id"));
+        String party_name = (String) request.getAttribute("party_name");
+        String candidate_fname = (String) request.getAttribute("candidate_fname");
+        String candidate_lname = (String) request.getAttribute("candidate_lname");
+        String candidate_quals = (String) request.getAttribute("candidate_quals");
 
+        switch (servletPath) {
+            case "/staff/party_management/add_party":
+                partycont.addParty(party_name);
+                break;
+            case "/staff/party_management/update_party":
+                partycont.updateParty(party_id, party_name); //TODO add list of candidates
+                break;
+            case "/staff/party_management/add_candidate":
+                candidatecont.addCandidate(candidate_fname, candidate_lname, candidate_quals,
+                        partycont.getPartyById(party_id));
+                break;
+            case "/staff/party_management/update_candidate":
+                candidatecont.updateCandidate(candidate_id, candidate_fname, candidate_lname, candidate_quals,
+                        partycont.getPartyById(party_id));
+                break;
+            default:
+                break;
+        }
     }
 }

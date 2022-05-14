@@ -2,7 +2,7 @@ package com.spr.votingsystem.model;
 
 import jakarta.persistence.*;
 
-import java.util.List;
+import java.util.*;
 
 @Entity
 public class Seat {
@@ -13,8 +13,13 @@ public class Seat {
     @Column(name = "seat_no_contesters")
     private int number_contesters;
 
-    @OneToMany
-    private List<Candidate> contesters;
+    @ManyToMany(targetEntity = Candidate.class, cascade = CascadeType.ALL) //Todo ManyToMany
+    @JoinTable(
+            name = "seats_candidates",
+            joinColumns = { @JoinColumn(name = "seat_id") },
+            inverseJoinColumns = { @JoinColumn(name = "candidate_id") },
+            uniqueConstraints = { @UniqueConstraint(columnNames = { "seat_id", "candidate_id"}) })
+    private Set<Candidate> contesters = new HashSet<>();
 
     public Seat() {}
 
@@ -34,11 +39,11 @@ public class Seat {
         this.number_contesters = number_contesters;
     }
 
-    public List<Candidate> getContesters() {
+    public Set<Candidate> getContesters() {
         return contesters;
     }
 
-    public void setContesters(List<Candidate> contesters) {
+    public void setContesters(Set<Candidate> contesters) {
         this.contesters = contesters;
     }
 }
