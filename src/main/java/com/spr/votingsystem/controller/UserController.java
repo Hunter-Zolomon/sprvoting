@@ -1,33 +1,22 @@
 package com.spr.votingsystem.controller;
 
+import com.spr.votingsystem.interfaces.UserLocal;
 import com.spr.votingsystem.model.Party;
 import com.spr.votingsystem.model.User;
+import com.spr.votingsystem.model.Vote;
 import com.spr.votingsystem.utilities.HelperFunctions;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.Persistence;
+import jakarta.ejb.EJBException;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.*;
 
 import java.util.List;
+import java.util.Set;
 
-public class UserController {
+@Stateless
+public class UserController implements UserLocal {
 
-    private final EntityManagerFactory factory;
+    @PersistenceContext
     private EntityManager manager;
-
-    public UserController() {
-        try {
-            factory = Persistence.createEntityManagerFactory("default");
-        } catch (Throwable ex) {
-            System.err.println("Failed to create entityManagerFactory object." + ex);
-            throw new ExceptionInInitializerError(ex);
-        }
-    }
-
-    public void shutdown() {
-        if (manager != null) manager.close();
-        if (factory != null) factory.close();
-    }
 
     public User authenticateUser(String username, String password) {
         User user = getUserByUsername(username);
@@ -37,125 +26,58 @@ public class UserController {
     }
 
     public User getUserById(Integer id) {
-        manager = factory.createEntityManager();
-        EntityTransaction tx = null;
-        User returnUser = null;
-
-        try {
-            tx = manager.getTransaction();
-            tx.begin();
-            returnUser = manager.find(User.class, id);
-            tx.commit();
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        } finally {
-            manager.close();
-        }
-        return returnUser;
+        return manager.find(User.class, id);
     }
 
     public User getUserByUsername(String username) {
-        manager = factory.createEntityManager();
-        EntityTransaction tx = null;
-        User returnUser = null;
+        return manager.createQuery("select u from User u where u.username = :value1", User.class)
+                .setParameter("value1", username).getSingleResult();
+    }
 
-        try {
-            tx = manager.getTransaction();
-            tx.begin();
-            returnUser = manager.createQuery("select u from User u where u.username = :value1", User.class)
-                    .setParameter("value1", username).getSingleResult();
-            tx.commit();
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        } finally {
-            manager.close();
-        }
-        return returnUser;
-}
-
-    public Integer addPublic(String usrname, String pass, String fname,
+    public User addPublic(String usrname, String pass, String fname,
                              String lname, String ic, String email, String addr,
                              String phone, int age, String gender, String race,
                              String religion, String education, double income) {
-        manager = factory.createEntityManager();
-        EntityTransaction tx = null;
-        Integer userID = null;
-
-        try {
-            tx = manager.getTransaction();
-            tx.begin();
-            User user = new User();
-            user.setUsername(usrname);
-            user.setPassword(pass);
-            user.setRole("Public");
-            user.setFirstName(fname);
-            user.setLastName(lname);
-            user.setIc(ic);
-            user.setEmail(email);
-            user.setAddress(addr);
-            user.setPhone_no(phone);
-            user.setAge(age);
-            user.setGender(gender);
-            user.setRace(race);
-            user.setReligion(religion);
-            user.setEducation(education);
-            user.setIncome(income);
-            user.setToken("x");
-            manager.persist(user);
-            tx.commit();
-            userID = user.getId();
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        } finally {
-            manager.close();
-        }
-        return userID;
+        User user = new User();
+        user.setUsername(usrname);
+        user.setPassword(pass);
+        user.setRole("Public");
+        user.setFirstName(fname);
+        user.setLastName(lname);
+        user.setIc(ic);
+        user.setEmail(email);
+        user.setAddress(addr);
+        user.setPhone_no(phone);
+        user.setAge(age);
+        user.setGender(gender);
+        user.setRace(race);
+        user.setReligion(religion);
+        user.setEducation(education);
+        user.setIncome(income);
+//            user.setToken("x");
+        manager.persist(user);
+        return user;
     }
 
-    public Integer addPartyRep(String usrname, String pass, String fname, String lname,
+    public User addPartyRep(String usrname, String pass, String fname, String lname,
                                String ic, String email, String addr, String phone, Party party) {
-        manager = factory.createEntityManager();
-        EntityTransaction tx = null;
-        Integer userID = null;
-
-        try {
-            tx = manager.getTransaction();
-            tx.begin();
-            User user = new User();
-            user.setUsername(usrname);
-            user.setPassword(pass);
-            user.setRole("Party");
-            user.setFirstName(fname);
-            user.setLastName(lname);
-            user.setIc(ic);
-            user.setEmail(email);
-            user.setAddress(addr);
-            user.setPhone_no(phone);
-            user.setParty(party);
-            manager.persist(user);
-            tx.commit();
-            userID = user.getId();
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        } finally {
-            manager.close();
-        }
-        return userID;
+        User user = new User();
+        user.setUsername(usrname);
+        user.setPassword(pass);
+        user.setRole("Party");
+        user.setFirstName(fname);
+        user.setLastName(lname);
+        user.setIc(ic);
+        user.setEmail(email);
+        user.setAddress(addr);
+        user.setPhone_no(phone);
+        user.setParty(party);
+//            manager.persist(user);
+        return manager.merge(user);
     }
 
-    public Integer addStaff(String usrname, String pass, String fname, String lname,
+    public User addStaff(String usrname, String pass, String fname, String lname,
                                String ic, String email, String addr, String phone) {
-        manager = factory.createEntityManager();
-        EntityTransaction tx = null;
-        Integer userID = null;
-
-        try {
-            tx = manager.getTransaction();
-            tx.begin();
             User user = new User();
             user.setUsername(usrname);
             user.setPassword(pass);
@@ -167,203 +89,127 @@ public class UserController {
             user.setAddress(addr);
             user.setPhone_no(phone);
             manager.persist(user);
-            tx.commit();
-            userID = user.getId();
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        } finally {
-            manager.close();
-        }
-        return userID;
+            return user;
+    }
+
+    public User addVote(Integer userID, Integer voteID) {
+        User user = manager.find(User.class, userID);
+        Vote retrievedVote = manager.find(Vote.class, voteID);
+        Set<Vote> votes = user.getVotes();
+        votes.add(retrievedVote);
+        user.setVotes(votes);
+        return manager.merge(user);
     }
 
     public List<User> listPublic() {
-        manager = factory.createEntityManager();
-        EntityTransaction tx = null;
-        List<User> allUsers = null;
+        return manager.createQuery("select u from User u where u.role = :value1", User.class)
+                .setParameter("value1", "Public")
+                .getResultList();
+    }
 
-        try {
-            tx = manager.getTransaction();
-            tx.begin();
-            allUsers = manager.createQuery("select u from User u where u.role = :value1", User.class)
-                    .setParameter("value1", "Public")
-                    .getResultList();
-            tx.commit();
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        } finally {
-            manager.close();
-        }
-        return allUsers;
+    public User changePassword(Integer userID, String new_password) {
+        User user = manager.find(User.class, userID);
+        user.setPassword(HelperFunctions.hashPassword(new_password));
+        return manager.merge(user);
+    }
+
+    public List<User> searchAllColumns(String type, String search_string) {
+        return manager.createQuery("select u from User u where (u.role like :value2) and " +
+                        "(u.username like :value1 or " +
+                        "u.firstName like :value1 or " +
+                        "u.lastName like :value1 or " +
+                        "u.ic like :value1 or " +
+                        "u.email like :value1 or " +
+                        "u.address like :value1 or " +
+                        "u.phone_no like :value1 or " +
+                        "u.gender like :value1 or " +
+                        "u.race like :value1 or " +
+                        "u.religion like :value1 or " +
+                        "u.education like :value1)", User.class)
+                .setParameter("value1", "%" + search_string + "%")
+                .setParameter("value2", "%" + type + "%")
+                .getResultList();
     }
 
     public List<User> listStaff() {
-        manager = factory.createEntityManager();
-        EntityTransaction tx = null;
-        List<User> allUsers = null;
-
-        try {
-            tx = manager.getTransaction();
-            tx.begin();
-            allUsers = manager.createQuery("select u from User u where u.role = :value1", User.class)
-                    .setParameter("value1", "Staff")
-                    .getResultList();
-            tx.commit();
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        } finally {
-            manager.close();
-        }
-        return allUsers;
+        return manager.createQuery("select u from User u where u.role = :value1", User.class)
+                .setParameter("value1", "Staff")
+                .getResultList();
     }
 
     public List<User> listParty() {
-        manager = factory.createEntityManager();
-        EntityTransaction tx = null;
-        List<User> allUsers = null;
-
-        try {
-            tx = manager.getTransaction();
-            tx.begin();
-            allUsers = manager.createQuery("select u from User u where u.role = :value1", User.class)
-                    .setParameter("value1", "Party")
-                    .getResultList();
-            tx.commit();
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        } finally {
-            manager.close();
-        }
-        return allUsers;
+        return manager.createQuery("select u from User u where u.role = :value1", User.class)
+                .setParameter("value1", "Party")
+                .getResultList();
     }
 
     public List<User> listUsers() {
-        manager = factory.createEntityManager();
-        EntityTransaction tx = null;
-        List<User> allUsers = null;
-
-        try {
-            tx = manager.getTransaction();
-            tx.begin();
-            allUsers = manager.createQuery("select u from User u", User.class).getResultList();
-            tx.commit();
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        } finally {
-            manager.close();
-        }
-        return allUsers;
+       return manager.createQuery("select u from User u", User.class).getResultList();
     }
 
-    public void updatePublic(Integer userID, String usrname, String pass, String fname, String lname,
+    public List<User> listUsersBy(String field, Object value) {
+        return manager.createQuery("select u from User u." + field + " = :value1", User.class)
+                .setParameter("value1", value)
+                .getResultList();
+    }
+    public User updatePublic(Integer userID, String usrname, String fname, String lname,
                              String ic, String email, String addr, String phone, Integer age,
                              String gender, String race, String religion, String education, Double income) {
-        manager = factory.createEntityManager();
-        EntityTransaction tx = null;
-
-        try {
-            tx = manager.getTransaction();
-            tx.begin();
-            User user = manager.find(User.class, userID);
-            user.setUsername(usrname);
-            user.setPassword(pass);
-            user.setFirstName(fname);
-            user.setLastName(lname);
-            user.setIc(ic);
-            user.setEmail(email);
-            user.setAddress(addr);
-            user.setPhone_no(phone);
-            user.setAge(age);
-            user.setGender(gender);
-            user.setRace(race);
-            user.setReligion(religion);
-            user.setEducation(education);
-            user.setIncome(income);
-            manager.merge(user);
-            tx.commit();
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        } finally {
-            manager.close();
-        }
+        User user = manager.find(User.class, userID);
+        user.setUsername(usrname);
+//            user.setPassword(pass);
+        user.setFirstName(fname);
+        user.setLastName(lname);
+        user.setIc(ic);
+        user.setEmail(email);
+        user.setAddress(addr);
+        user.setPhone_no(phone);
+        user.setAge(age);
+        user.setGender(gender);
+        user.setRace(race);
+        user.setReligion(religion);
+        user.setEducation(education);
+        user.setIncome(income);
+        return manager.merge(user);
     }
 
-    public void updateStaff(Integer userID, String usrname, String pass, String fname, String lname,
+    public User updateStaff(Integer userID, String usrname, String fname, String lname,
                             String ic, String email, String addr, String phone) {
-        manager = factory.createEntityManager();
-        EntityTransaction tx = null;
-
-        try {
-            tx = manager.getTransaction();
-            tx.begin();
-            User user = manager.find(User.class, userID);
-            user.setUsername(usrname);
-            user.setPassword(pass);
-            user.setFirstName(fname);
-            user.setLastName(lname);
-            user.setIc(ic);
-            user.setEmail(email);
-            user.setAddress(addr);
-            user.setPhone_no(phone);
-            manager.merge(user);
-            tx.commit();
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        } finally {
-            manager.close();
-        }
+        User user = manager.find(User.class, userID);
+        user.setUsername(usrname);
+//            user.setPassword(pass);
+        user.setFirstName(fname);
+        user.setLastName(lname);
+        user.setIc(ic);
+        user.setEmail(email);
+        user.setAddress(addr);
+        user.setPhone_no(phone);
+        return manager.merge(user);
     }
 
-    public void updateParty(Integer userID, String usrname, String pass, String fname, String lname,
+    public User updateParty(Integer userID, String usrname, String fname, String lname,
                             String ic, String email, String addr, String phone, Party party) {
-        manager = factory.createEntityManager();
-        EntityTransaction tx = null;
-
-        try {
-            tx = manager.getTransaction();
-            tx.begin();
-            User user = manager.find(User.class, userID);
-            user.setUsername(usrname);
-            user.setPassword(pass);
-            user.setFirstName(fname);
-            user.setLastName(lname);
-            user.setIc(ic);
-            user.setEmail(email);
-            user.setAddress(addr);
-            user.setPhone_no(phone);
-            user.setParty(party);
-            manager.merge(user);
-            tx.commit();
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        } finally {
-            manager.close();
-        }
+        User user = manager.find(User.class, userID);
+        user.setUsername(usrname);
+//            user.setPassword(pass);
+        user.setFirstName(fname);
+        user.setLastName(lname);
+        user.setIc(ic);
+        user.setEmail(email);
+        user.setAddress(addr);
+        user.setPhone_no(phone);
+        user.setParty(party);
+        return manager.merge(user);
     }
 
-    public void deleteUser(Integer userID) {
-        manager = factory.createEntityManager();
-        EntityTransaction tx = null;
-
+    public boolean deleteUser(Integer userID) {
         try {
-            tx = manager.getTransaction();
-            tx.begin();
             User user = manager.find(User.class, userID);
             manager.remove(user);
-            tx.commit();
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        } finally {
-            manager.close();
+            return true;
+        } catch (EJBException ex) {
+            ex.printStackTrace();
+            return false;
         }
     }
 }
