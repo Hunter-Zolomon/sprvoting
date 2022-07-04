@@ -1,34 +1,56 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Account Management</title>
 </head>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
-      crossorigin="anonymous">
 <body>
+<jsp:include page="staff_banner.jsp"></jsp:include>
 
-<header>
-    <nav class="navbar navbar-expand-md navbar-dark" style="background-color: blue">
-       <div>
-           <a href="${pageContext.request.contextPath}/staff/account_management" class="navbar-brand">Account Management</a>
-       </div>
-        <ul class="navbar-nav">
-            <a href="${pageContext.request.contextPath}/staff/account_management/grab_public" class="nav-link">Public</a>
-            <a href="${pageContext.request.contextPath}/staff/account_management/grab_staff" class="nav-link">Staff</a>
-            <a href="${pageContext.request.contextPath}/staff/account_management/grab_party" class="nav-link">Party</a>
-        </ul>
-    </nav>
-</header>
 <br>
-<div class="row">
+
+<form method="get">
+    <div class="row">
     <div class="container">
         <h3 class="text-center">List of Users</h3>
         <hr>
-        <div class="container text-left">
-            <a href="#" class="btn btn-access">Add New User</a>
+        <c:if test="${error != null}">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    ${error}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </c:if>
+        <div class="input-group input-group-sm mb-3">
+            <span class="input-group-text" id="search">Search</span>
+            <input type="text" name="search_string" value=""
+                   class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+
+            <span class="input-group-text" id="type">Type</span>
+            <input type="submit" class="btn-check" formaction="${pageContext.request.contextPath}/staff/account_management"
+                   name="user_type" id="all_button" autocomplete="off">
+            <label class="btn btn-outline-success" for="all_button">All</label>
+            <input type="submit" class="btn-check" formaction="${pageContext.request.contextPath}/staff/account_management/grab_public"
+                   name="user_type" id="public_button" autocomplete="off">
+            <label class="btn btn-outline-success" for="public_button">Public</label>
+            <input type="submit" class="btn-check" formaction="${pageContext.request.contextPath}/staff/account_management/grab_party"
+                   name="user_type" id="party_button" autocomplete="off">
+            <label class="btn btn-outline-success" for="party_button">Party</label>
+            <input type="submit" class="btn-check" formaction="${pageContext.request.contextPath}/staff/account_management/grab_staff"
+                   name="user_type" id="staff_button" autocomplete="off">
+            <label class="btn btn-outline-success" for="staff_button">Staff</label>
+
+<%--        <select class="form-select" name="type" aria-label="User Type Selection">--%>
+<%--            <option value="All">All</option>--%>
+<%--            <option value="Public">Public</option>--%>
+<%--            <option value="Party">Party</option>--%>
+<%--            <option value="Staff">Staff</option>--%>
+<%--        </select>--%>
+    <%--          <button type="submit" formaction="/staff/account_management/grab_public" class="btn btn-primary">Filter</button>--%>
+    <%--          <button type="submit" formaction="/staff/add_edit_user.jsp" class="btn btn-info">Add New User</button>--%>
+<%--          <a href="${pageContext.request.contextPath}/staff/account_management/grab_public" class="btn btn-primary">Filter</a>--%>
+          <a href="${pageContext.request.contextPath}/staff/account_management/add_user" class="btn btn-info">Add New User</a>
         </div>
         <br>
         <table class="table table-bordered">
@@ -50,7 +72,6 @@
                 <th>Religion</th>
                 <th>Education</th>
                 <th>Income</th>
-                <th>Token</th>
                 <th>Actions</th>
             </tr>
             </thead>
@@ -73,10 +94,11 @@
                     <td><c:out value="${user.religion}"/></td>
                     <td><c:out value="${user.education}"/></td>
                     <td><c:out value="${user.income}"/></td>
-                    <td><c:out value="${user.token}"/></td>
                     <td>
                         <a href="${pageContext.request.contextPath}/staff/account_management/update_user?id=<c:out value='${user.id}' />">Edit</a>
-                        <a href="${pageContext.request.contextPath}/staff/account_management/delete_user?id=<c:out value='${user.id}' />">Delete</a>
+                        <c:if test="${user.id != user_id}">
+                            <a href="${pageContext.request.contextPath}/staff/account_management/delete_user?id=<c:out value='${user.id}' />">Delete</a>
+                        </c:if>
                     </td>
                 </tr>
             </c:forEach>
@@ -84,6 +106,7 @@
         </table>
     </div>
 </div>
+</form>
 
 </body>
 </html>

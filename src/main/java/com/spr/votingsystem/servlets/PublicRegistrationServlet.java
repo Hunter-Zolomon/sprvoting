@@ -1,7 +1,12 @@
 package com.spr.votingsystem.servlets;
 
 import com.spr.votingsystem.controller.UserController;
+import com.spr.votingsystem.interfaces.UserLocal;
+import com.spr.votingsystem.mail.EmailUtility;
+import com.spr.votingsystem.model.User;
 import com.spr.votingsystem.utilities.HelperFunctions;
+import jakarta.ejb.EJB;
+import jakarta.ejb.EJBException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -13,18 +18,21 @@ import java.io.IOException;
 @WebServlet(name = "PublicRegistrationServlet", urlPatterns = {"/pub_register"})
 public class PublicRegistrationServlet extends HttpServlet {
 
-    private UserController usrcont;
+//    private UserController usrcont;
+    @EJB
+    private UserLocal usrcont;
 
-    public void init() {
-        usrcont = new UserController();
-    }
+//    public void init() {
+//        usrcont = new UserController();
+//    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-        String firstName = request.getParameter("first_name");
-        String lastName = request.getParameter("last_name");
-        String ic = request.getParameter("ic_no");
+        String firstName = request.getParameter("fname");
+        String lastName = request.getParameter("lname");
+        String ic = request.getParameter("ic");
         String email = request.getParameter("email");
         String address = request.getParameter("address");
         String phone_no = request.getParameter("phone_no");
@@ -35,16 +43,30 @@ public class PublicRegistrationServlet extends HttpServlet {
         String education = request.getParameter("education");
         double income = Double.parseDouble(request.getParameter("income"));
         
-//        String generatedPass = HelperFunctions.randomPasswordGenerator();
+        String generatedPass = HelperFunctions.randomPasswordGenerator();
 
-        Integer idResult = usrcont.addPublic(username, HelperFunctions.hashPassword(password), firstName, lastName,
+        try {
+            User newUser = usrcont.addPublic(username, HelperFunctions.hashPassword(generatedPass), firstName, lastName,
                     ic, email, address, phone_no, age, gender, race, religion, education, income);
+            if (newUser != null) {
+            EmailUtility.sendEmail("smtp.gmail.com",
+                    587,
+                    "address@localmail.com",
+                    "someSecurePassword",
+                    "address@localmail.com",
+                    "SPR Account Registration",
+                    EmailUtility.emailConstructor("pass", generatedPass));
+                response.sendRedirect(request.getContextPath() + "/usr_redirector");
+            }
+        } catch (EJBException ex) {
+            if (username.isEmpty()) {
+                request.setAttribute("error", "An account with those credentials exists. Please try logging in!");
+            } else {
+                request.setAttribute("error", "An internal error occurred. Please try again.");
+            }
+        }
 
-        if (idResult >= 0) {
-//            EmailUtility.sendEmail("", "", "", "<z3D!P1ltF", ).emailConstructor()
-            response.sendRedirect(request.getContextPath() + "/usr_redirector");
-        } else {
-            response.getWriter().println("Your account wasn't registered due to an error! Please try again.");
+//            response.getWriter().println("Your account wasn't registered due to an error! Please try again.");
+            request.getRequestDispatcher("/open_register.jsp").forward(request, response);
         }
     }
-}

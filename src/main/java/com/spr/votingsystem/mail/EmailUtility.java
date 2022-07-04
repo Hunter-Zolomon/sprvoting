@@ -10,7 +10,7 @@ public class EmailUtility {
     public static void sendEmail(String host, int port, final String username,
                                  final String password, String toAddr, String subj, String msg) {
         Email email = EmailBuilder.startingBlank()
-          .from("From", "sprvotingsystem@disroot.org")
+          .from("From", "address@localmail.com")
           .to("To", toAddr)
           .withSubject(subj)
           .withPlainText(msg)
