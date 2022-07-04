@@ -2,10 +2,14 @@ package com.spr.votingsystem.model;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "user_id")
     private int id;
 
     @Column(name = "user_username", nullable = false, unique = true)
@@ -23,10 +27,10 @@ public class User {
     @Column(name = "user_last_name", nullable = false)
     private String lastName;
 
-    @Column(name = "user_ic", nullable = false)
+    @Column(name = "user_ic", nullable = false, unique = true)
     private String ic;
 
-    @Column(name = "user_email", nullable = false)
+    @Column(name = "user_email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "user_address", nullable = false)
@@ -53,10 +57,10 @@ public class User {
     @Column(name = "user_income")
     private double income;
 
-    @Column(name = "user_token")
-    private String token;
+    @ManyToMany(targetEntity = Vote.class, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    private Set<Vote> votes = new HashSet<>();
 
-    @OneToOne(targetEntity = Party.class, cascade = CascadeType.ALL)
+    @OneToOne(targetEntity = Party.class, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 //    @JoinColumn(name = "fk_up")
     private Party party;
 
@@ -190,19 +194,19 @@ public class User {
         this.income = income;
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
     public Party getParty() {
         return party;
     }
 
     public void setParty(Party party) {
         this.party = party;
+    }
+
+    public Set<Vote> getVotes() {
+        return votes;
+    }
+
+    public void setVotes(Set<Vote> votes) {
+        this.votes = votes;
     }
 }

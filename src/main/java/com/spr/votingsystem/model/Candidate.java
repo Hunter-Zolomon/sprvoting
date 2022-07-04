@@ -21,23 +21,31 @@ public class Candidate {
     @Column(name = "candidate_qualifications", nullable = false)
     private String qualifications;
 
-    @OneToOne
+    @ManyToOne(targetEntity = Party.class, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+//    @JoinTable(
+//            name = "candidate_party",
+//            joinColumns = { @JoinColumn(name = "candidate_id") },
+//            inverseJoinColumns = { @JoinColumn(name = "party_id") },
+//            uniqueConstraints = { @UniqueConstraint(columnNames = { "candidate_id", "party_id"}) })
     private Party party;
 
-    @ManyToMany(targetEntity = Seat.class, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "candidates_seats",
-            joinColumns = { @JoinColumn(name = "candidate_id") },
-            inverseJoinColumns = { @JoinColumn(name = "seat_id") },
-            uniqueConstraints = { @UniqueConstraint(columnNames = { "candidate_id", "seat_id"}) })
+    @ManyToMany(targetEntity = Seat.class, cascade = { CascadeType.PERSIST, CascadeType.MERGE }, mappedBy = "contesters")
+//    @JoinTable(
+//            name = "candidates_seats",
+//            joinColumns = { @JoinColumn(name = "candidate_id") },
+//            inverseJoinColumns = { @JoinColumn(name = "seat_id") },
+//            uniqueConstraints = { @UniqueConstraint(columnNames = { "candidate_id", "seat_id"}) })
     private Set<Seat> seats = new HashSet<>();
 
-    @ManyToMany(targetEntity = Election.class, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "candidates_elections",
-            joinColumns = { @JoinColumn(name = "candidate_id") },
-            inverseJoinColumns = { @JoinColumn(name = "election_id") },
-            uniqueConstraints = { @UniqueConstraint(columnNames = { "candidate_id", "election_id"}) })
+    @OneToMany(targetEntity = Vote.class, cascade = CascadeType.ALL, mappedBy = "candidate")
+    private Set<Vote> votes = new HashSet<>();
+
+    @ManyToMany(targetEntity = Election.class, cascade = { CascadeType.PERSIST, CascadeType.MERGE }, mappedBy = "candidates")
+//    @JoinTable(
+//            name = "candidates_elections",
+//            joinColumns = { @JoinColumn(name = "candidate_id") },
+//            inverseJoinColumns = { @JoinColumn(name = "election_id") },
+//            uniqueConstraints = { @UniqueConstraint(columnNames = { "candidate_id", "election_id"}) })
     private Set<Election> elections = new HashSet<>();
 
     public Candidate() {}
@@ -96,5 +104,13 @@ public class Candidate {
 
     public void setElections(Set<Election> elections) {
         this.elections = elections;
+    }
+
+    public Set<Vote> getVotes() {
+        return votes;
+    }
+
+    public void setVotes(Set<Vote> votes) {
+        this.votes = votes;
     }
 }

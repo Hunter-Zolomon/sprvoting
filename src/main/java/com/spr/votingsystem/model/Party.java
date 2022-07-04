@@ -3,6 +3,7 @@ package com.spr.votingsystem.model;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Entity
@@ -12,21 +13,24 @@ public class Party {
     @Column(name = "party_id")
     private int id;
 
-    @Column(name = "party_code", nullable = false)
+    @Column(name = "party_code", nullable = false, unique = true)
     private String code;
 
-    @Column(name = "party_name", nullable = false)
+    @Column(name = "party_name", nullable = false, unique = true)
     private String name;
 
-    @OneToMany(targetEntity = Candidate.class, cascade = CascadeType.ALL)
+    @Column(name = "party_description", nullable = false)
+    private String description;
+
+    @OneToMany(targetEntity = Candidate.class, cascade = CascadeType.ALL, mappedBy = "party")
+//    @JoinTable(
+//            name = "parties_candidates",
+//            joinColumns = { @JoinColumn(name = "party_id") },
+//            inverseJoinColumns = { @JoinColumn(name = "candidate_id") },
+//            uniqueConstraints = { @UniqueConstraint(columnNames = { "party_id", "candidate_id" })})
     private Set<Candidate> candidates = new HashSet<>();
 
-    @ManyToMany(targetEntity = Election.class, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "parties_elections",
-            joinColumns = { @JoinColumn(name = "party_id") },
-            inverseJoinColumns = { @JoinColumn(name = "election_id") },
-            uniqueConstraints = { @UniqueConstraint(columnNames = { "party_id", "election_id"}) })
+    @ManyToMany(targetEntity = Election.class, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     private Set<Election> elections = new HashSet<>();
 
     public Party() {}
@@ -69,5 +73,13 @@ public class Party {
 
     public void setElections(Set<Election> elections) {
         this.elections = elections;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
